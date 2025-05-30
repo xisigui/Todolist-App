@@ -114,6 +114,28 @@ const TodoDashboard = ({ user, onLogout }: TodoDashboardProps) => {
     const todo = todos.find((t) => t.id === id);
     if (!todo) return;
 
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/todos/${id}/`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const res = await response.json();
+        console.log(res);
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+    } finally {
+      setTodos(todos.filter((todo) => todo.id !== id));
+    }
+
     toast("Task Deleted", {
       description: `"${todo.title}" has been removed from your tasks.`,
     });
