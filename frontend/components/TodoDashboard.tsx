@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import TodoItem from "@/components/TodoItem";
 import AddTodoForm from "@/components/AddTodoForm";
 import EditTodoForm from "./EditTodoForm";
+import { getAuthToken } from "@/lib/utils";
 
 interface Todo {
   id: number;
@@ -28,7 +29,39 @@ interface TodoDashboardProps {
 }
 
 const TodoDashboard = ({ user, onLogout }: TodoDashboardProps) => {
+  const token = getAuthToken();
+
   const [todos, setTodos] = useState<Todo[]>([]);
+
+  async function fetchData() {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/todos/`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData);
+      }
+
+      const data = await response.json();
+      setTodos(data);
+    } catch (error) {
+      console.error("Error Occur:", error);
+      toast.error(`"Error Occur: ${error.message}`);
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 
