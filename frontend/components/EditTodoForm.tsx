@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Save } from "lucide-react";
+import { getAuthToken } from "@/lib/utils";
 
 interface Todo {
   id: number;
@@ -22,12 +23,33 @@ interface EditTodoFormProps {
 const EditTodoForm = ({ todo, onUpdate, onCancel }: EditTodoFormProps) => {
   const [title, setTitle] = useState(todo.title);
   const [description, setDescription] = useState(todo.description);
+  const token = getAuthToken();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/todos/${todo.id}/`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify({ title, description }),
+        }
+      );
 
-    if (title.trim()) {
-      onUpdate(todo.id, title.trim(), description.trim());
+      if (!response.ok) {
+        const res = await response.json();
+        console.log(res);
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+    } finally {
+      if (title.trim()) {
+        onUpdate(todo.id, title.trim(), description.trim());
+      }
     }
   };
 
