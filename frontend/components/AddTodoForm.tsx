@@ -38,12 +38,11 @@ const AddTodoForm = ({ onAdd, onCancel }: AddTodoFormProps) => {
       }
     } catch (error) {
       console.error("Error: ", error);
-    } finally {
-      if (title.trim()) {
-        onAdd(title.trim(), description.trim());
-        setTitle("");
-        setDescription("");
-      }
+    }
+    if (title.trim()) {
+      onAdd(title.trim(), description.trim());
+      setTitle("");
+      setDescription("");
     }
   };
 

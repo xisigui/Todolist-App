@@ -32,6 +32,9 @@ const TodoDashboard = ({ user, onLogout }: TodoDashboardProps) => {
   const token = getAuthToken();
 
   const [todos, setTodos] = useState<Todo[]>([]);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   async function fetchData() {
     try {
@@ -58,15 +61,8 @@ const TodoDashboard = ({ user, onLogout }: TodoDashboardProps) => {
     }
   }
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
-
-  const completedCount = todos.filter((todo) => todo.completed).length;
-  const totalCount = todos.length;
 
   const addTodo = (title: string, description: string) => {
     const newTodo: Todo = {
@@ -99,15 +95,36 @@ const TodoDashboard = ({ user, onLogout }: TodoDashboardProps) => {
     const todo = todos.find((t) => t.id === id);
     if (!todo) return;
 
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/todos/${todo.id}/`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify({ completed: !todo.completed }),
+        }
+      );
 
-    toast(todo.completed ? "Task Marked as Pending" : "Task Completed", {
-      description: `"${todo.title}" status has been updated.`,
-    });
+      if (!response.ok) {
+        const res = await response.json();
+        console.log(res);
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+    } finally {
+      setTodos(
+        todos.map((todo) =>
+          todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        )
+      );
+
+      toast(todo.completed ? "Task Marked as Pending" : "Task Completed", {
+        description: `"${todo.title}" status has been updated.`,
+      });
+    }
   };
 
   const deleteTodo = async (id: number) => {
@@ -140,6 +157,9 @@ const TodoDashboard = ({ user, onLogout }: TodoDashboardProps) => {
       description: `"${todo.title}" has been removed from your tasks.`,
     });
   };
+
+  const completedCount = todos.filter((todo) => todo.completed).length;
+  const totalCount = todos.length;
 
   return (
     <div className="min-h-screen p-4 max-w-4xl mx-auto">
