@@ -13,9 +13,10 @@ import { CheckCircle, User, Lock } from "lucide-react";
 
 interface LoginFormProps {
   onLogin: (username: string, password: string) => void;
+  onSignup: (username: string, password: string) => void;
 }
 
-const LoginForm = ({ onLogin }: LoginFormProps) => {
+const LoginForm = ({ onLogin, onSignup }: LoginFormProps) => {
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [signupUsername, setSignupUsername] = useState("");
@@ -28,10 +29,10 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (signupUsername.trim()) {
-      onLogin(signupUsername, signupPassword);
+      onSignup(signupUsername, signupPassword);
     }
   };
 

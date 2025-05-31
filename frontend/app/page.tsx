@@ -69,7 +69,7 @@ export default function Home() {
         setIsLoggedIn(false);
         localStorage.removeItem("authToken");
         localStorage.removeItem("username");
-        toast(res.message);
+        toast.success(res.message);
       }
     } catch (error) {
       console.error("Logout error:", error);
@@ -77,10 +77,35 @@ export default function Home() {
     }
   };
 
+  const handleSignup = async (username: string, password: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error);
+      }
+      toast.success("Successfully Registered");
+      handleLogin(username, password);
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error(error.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {!isLoggedIn ? (
-        <LoginForm onLogin={handleLogin} />
+        <LoginForm onLogin={handleLogin} onSignup={handleSignup} />
       ) : (
         <TodoDashboard user={currentUser} onLogout={handleLogout} />
       )}
